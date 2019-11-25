@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\bancosModel;
 
 class bancosController extends Controller
 {
@@ -13,7 +14,9 @@ class bancosController extends Controller
      */
     public function index()
     {
-       return view("bancos");
+        $bancos = bancosModel::all();
+       return view("bancos", compact("bancos"));
+       
     }
 
     /**
@@ -34,7 +37,20 @@ class bancosController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if(bancosModel::where("nombrebanco",$request->nombre)->where("codigo",$request->sucursal)->exists()){
+            return redirect("bancos")->with("error","Ya existe la sucursal"
+                    .$request->sucursal."para el banco".$request->nombre);
+        }
+        else{
+        $bancos=new bancosModel();
+        $bancos->nombrebanco=$request->nombre;//primero es el de la bd y el segundo es el del formulario
+        $bancos->telefono=$request->telefono;//primero es el de la bd y el segundo es el del formulario
+        $bancos->codigo=$request->sucursal;//primero es el de la bd y el segundo es el del formulario
+        $bancos->save();
+        return redirect("bancos")->with("success", "Banco almacenado");
+        
+        //return redirect()->("plantilla.blade.php"); //nombre de la vista
+    }
     }
 
     /**
@@ -56,7 +72,13 @@ class bancosController extends Controller
      */
     public function edit($id)
     {
-        //
+        if(bancosModel::where("id",$id)->exists()){
+        $bancos = bancosModel::select("*")->where("id",$id)->get();
+        return view("editabancos", compact("bancos"));
+        }
+        else{return redirect("bancos")->with("error", "El Banco no existe");
+        
+        }
     }
 
     /**
@@ -68,7 +90,18 @@ class bancosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+         if(bancosModel::where("id",$id)->exists()){
+        $bancos = bancosModel::find($id);
+        $bancos->nombrebanco=$request->nombre;//primero es el de la bd y el segundo es el del formulario
+        $bancos->telefono=$request->telefono;//primero es el de la bd y el segundo es el del formulario
+        $bancos->codigo=$request->sucursal;//primero es el de la bd y el segundo es el del formulario
+        $bancos->save();
+        return redirect("bancos")->with("success", "Banco actualizado");
+        }
+        else{return redirect("bancos")->with("error", "El Banco no existe");
+        
+        }
+        
     }
 
     /**
@@ -79,6 +112,13 @@ class bancosController extends Controller
      */
     public function destroy($id)
     {
-        //
+        if(bancosModel::where("id",$id)->exists()){
+        $bancos = bancosModel::find($id);
+        $bancos->delete();
+        return redirect("bancos")->with("success", "Banco eliminado");
+    }
+        else{return redirect("bancos")->with("error", "El Banco no existe");
+        
+        }
     }
 }
