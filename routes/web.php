@@ -11,11 +11,21 @@
 |
 */
 
+
+
+
+Route::group(['middleware'=>'auth'], function(){
+    
+Route::resource('/bancos','bancosController');
 Route::get('/', function () {
     return view('welcome');
 });
 Route::get('/hi', function () {
     return "Hola mundo";
 });
-Route::resource('/bancos','bancosController');
+});
 
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
